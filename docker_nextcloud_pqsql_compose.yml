@@ -1,0 +1,65 @@
+version: "3"
+
+volumes:
+  #nextcloud:
+  nc2data:
+  pgsqldb:
+  #nextcloud-app:
+
+networks:
+  nginx_proxy_frontend:
+    # add this if the network is already existing!
+    external: true
+  nginx_proxy_backend:
+    # add this if the network is already existing!
+    external: true
+
+services:
+
+  nextcloud-pgsql-app:
+    image: nextcloud:23
+    restart: always
+    volumes:
+      #- /opt/docker/nextcloud/next:/var/www/html
+      #- /media/HDD1:/opt/phoenyx-cloud/data
+      #- /media/HDD2:/opt/phoenyx-cloud/data2
+      #- nextcloud:/var/www/html
+      #- nextcloud-app:/var/www/html/app
+      - nc2data:/var/www/html/
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
+      interval: 30s
+      retries: 5
+      #start_period: 20s
+      timeout: 10s
+    environment:
+      - POSTGRES_PASSWORD=xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
+      - POSTGRES_DATABASE=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_HOST=nextcloud-pgsql-db
+    ports:
+      - '8088:80'
+    networks:
+      - nginx_proxy_frontend
+      - nginx_proxy_backend
+
+  nextcloud-pgsql-db:
+    image: postgres:alpine
+    restart: always
+    volumes:
+      - pgsqldb:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_ROOT_PASSWORD=L5IQe29WPspWJmxjN7xxbqmFIDmuUZ
+      - POSTGRES_PASSWORD=xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
+      - POSTGRES_DATABASE=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_HOST=nextcloud-pgsql-db
+    #healthcheck:
+    #  test: POSTGRES nextcloud --user=root --password=L5IQe29WPspWJmxjN7xxbqmFIDmuUZ --silent --execute "SELECT 1;"
+    #  interval: 30s
+    #  timeout: 10s
+    #  retries: 5 
+    ports:
+      - '5433:5432'
+    networks:
+      - nginx_proxy_backend
