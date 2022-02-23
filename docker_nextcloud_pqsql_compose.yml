@@ -1,9 +1,10 @@
-version: "3"
+version: "3.5"
 
 volumes:
   #nextcloud:
-  pgsql_data:
-  pgsql_db:
+  data:
+  db:
+  pgadmin:
   #nextcloud-app:
 
 networks:
@@ -17,20 +18,21 @@ networks:
 services:
 
   nextcloud-pgsql-app:
+    container_name: nc_pgsql_app
     image: nextcloud:23
     restart: always
     volumes:
-      - psql_data:/var/www/html/
+      - data:/var/www/html/
     healthcheck:
       test: curl --fail http://localhost || exit 1
       interval: 30s
       retries: 5
       timeout: 10s
     environment:
-      - POSTGRES_PASSWORD=xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
-      - POSTGRES_DATABASE=nextcloud
-      - POSTGRES_USER=nextcloud
-      - POSTGRES_HOST=nextcloud-pgsql-db
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-xwmhP02WZ6rnUz5uzT9LIh7pROIqfr}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE:-nextcloud}
+      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
+      POSTGRES_HOST: ${POSTGRES_HOST:-nc_pqsql_db}
     ports:
       - '8088:80'
     networks:
@@ -38,22 +40,43 @@ services:
       - nginx_proxy_backend
 
   nextcloud-pgsql-db:
+    container_name: nc_pqsql_db
     image: postgres:alpine
     restart: always
     volumes:
-      - pgsql_db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_ROOT_PASSWORD=L5IQe29WPspWJmxjN7xxbqmFIDmuUZ
-      - POSTGRES_PASSWORD=xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
-      - POSTGRES_DATABASE=nextcloud
-      - POSTGRES_USER=nextcloud
-      - POSTGRES_HOST=nextcloud-pgsql-db
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-xwmhP02WZ6rnUz5uzT9LIh7pROIqfr}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE:-nextcloud}
+      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
+      #- POSTGRES_ROOT_PASSWORD=L5IQe29WPspWJmxjN7xxbqmFIDmuUZ
+      #- POSTGRES_PASSWORD=xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
+      #- POSTGRES_DATABASE=nextcloud
+      #- POSTGRES_USER=nextcloud
+      #- POSTGRES_HOST=nextcloud-pgsql-db
     #healthcheck:
     #  test: POSTGRES nextcloud --user=root --password=L5IQe29WPspWJmxjN7xxbqmFIDmuUZ --silent --execute "SELECT 1;"
     #  interval: 30s
     #  timeout: 10s
     #  retries: 5 
     ports:
-      - '5433:5432'
+      - '5432:5432'
     networks:
       - nginx_proxy_backend
+  
+  nextcloud-pqsql-pgadmin:
+    container_name: nc_pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@phoenyx.me}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      POSTGRES_HOST: ${POSTGRES_HOST:-nc_pqsql_db}
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - nginx_proxy_frontend
+      - nginx_proxy_backend
+    restart: unless-stopped
