@@ -1,11 +1,9 @@
 version: "3.5"
 
 volumes:
-  #nextcloud:
-  data:
-  db:
+  pgdata:
+  pgdb:
   pgadmin:
-  #nextcloud-app:
 
 networks:
   nginx_proxy_frontend:
@@ -16,50 +14,21 @@ networks:
     external: true
 
 services:
-
-  nc-pgsql-app:
-    container_name: nc-pgsql-app
-    image: nextcloud:23
-    restart: always
-    volumes:
-      - data:/var/www/html/
-    healthcheck:
-      test: curl --fail http://localhost || exit 1
-      interval: 30s
-      retries: 5
-      timeout: 10s
-    environment:
-      POSTGRES_PASSWORD: xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
-      POSTGRES_DB: nextcloud
-      POSTGRES_USER: postgres
-      POSTGRES_HOST: nc-pgsql-db
-      POSTGRES_PORT: 5433
-    ports:
-      - '8088:80'
-    networks:
-      - nginx_proxy_frontend
-      - nginx_proxy_backend
-
   nc-pgsql-db:
     container_name: nc-pgsql-db
     image: postgres:alpine
     restart: always
     volumes:
-      - db:/var/lib/postgresql/data
+      - pgdb:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
       POSTGRES_DATABASE: nextcloud
       POSTGRES_USER: postgres
-      #- POSTGRES_ROOT_PASSWORD=L5IQe29WPspWJmxjN7xxbqmFIDmuUZ
-      #- POSTGRES_PASSWORD=xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
-      #- POSTGRES_DATABASE=nextcloud
-      #- POSTGRES_USER=nextcloud
-      #- POSTGRES_HOST=nextcloud-pgsql-db
-    #healthcheck:
-    #  test: POSTGRES nextcloud --user=root --password=L5IQe29WPspWJmxjN7xxbqmFIDmuUZ --silent --execute "SELECT 1;"
-    #  interval: 30s
-    #  timeout: 10s
-    #  retries: 5 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     ports:
       - '5433:5432'
     networks:
@@ -67,6 +36,8 @@ services:
   
   nc-pgsql-pgadmin:
     container_name: nc-pgadmin
+    depends_on:
+      - nc-pgsql-db
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@phoenyx.me
@@ -81,3 +52,32 @@ services:
       - nginx_proxy_frontend
       - nginx_proxy_backend
     restart: unless-stopped
+
+  nc-pgsql-app:
+    container_name: nc-pgsql-app
+    depends_on:
+      - nc-pgsql-db
+    build: 
+      context: .
+      dockerfile: docker_nc_pgsql_app
+    restart: always
+    ports:
+      - '8088:80'
+    volumes:
+      - pgdata:/var/www/html/
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
+      interval: 30s
+      retries: 5
+      timeout: 10s
+    environment:
+      POSTGRES_PASSWORD: xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: postgres
+      POSTGRES_HOST: nc-pgsql-db
+      POSTGRES_DB_PORT: 5433
+      NC_overwriteprotocol: https         #set overwriteprotocol to https to fix Remote Proxy Failure
+      NC_default_phone_region: DE     #Set default_phone_region to DE=Germany
+    networks:
+      - nginx_proxy_frontend
+      - nginx_proxy_backend
