@@ -1,4 +1,4 @@
-version: "3.5"
+version: "3"
 
 volumes:
   pgdata:
@@ -38,7 +38,7 @@ services:
     container_name: nc-pgadmin
     depends_on:
       - nc-pgsql-db
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:latest
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@phoenyx.me
       PGADMIN_DEFAULT_PASSWORD: admin
