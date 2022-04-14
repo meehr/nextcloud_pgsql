@@ -2,7 +2,7 @@
 #Dazu gehören in meinem Fall Packete wie Nano oder MC aber auch die SVG Unterstützung für IMagic
 #Aufgerufen wird das ganze mit: docker-compose -f "docker-compose-file" up -d --build
 #Ich habe mich für diesen Weg entschieden da ich so das Original Docker Image von Nextcloud nutzen
-#kann und alles andere nachinstallieren.
+#kann und alles andere nachinstallieren.1
 
 FROM nextcloud:23
 
