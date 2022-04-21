@@ -1,7 +1,6 @@
-version: "3"
+version: "3.9"
 
 volumes:
-  pgdata:
   pgdb:
   pgadmin:
 
@@ -14,16 +13,19 @@ networks:
     external: true
 
 services:
-  nc-pgsql-db:
-    container_name: nc-pgsql-db
+  nextcloud-db:
+    container_name: nc-postgres
+    hostname: nc-postgres
     image: postgres:alpine
     restart: always
     volumes:
       - pgdb:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     environment:
-      POSTGRES_PASSWORD: xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
-      POSTGRES_DATABASE: nextcloud
-      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${P_PW}
+      POSTGRES_DB: ${P_DB}
+      POSTGRES_USER: ${P_U}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 30s
@@ -33,19 +35,30 @@ services:
       - '5433:5432'
     networks:
       - nginx_proxy_backend
-  
-  nc-pgsql-pgadmin:
+
+  nextcloud-redis:
+    image: redis:alpine
+    container_name: nc-redis
+    hostname: nextcloud-redis
+    networks:
+        - nginx_proxy_backend
+    restart: unless-stopped
+    #Redis Passwort eingeben
+    command: redis-server --requirepass ${R_PW}
+
+  nextcloud-pgadmin:
     container_name: nc-pgadmin
     depends_on:
-      - nc-pgsql-db
+      - nc-postgres
+      - nc-redis
     image: dpage/pgadmin4:latest
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@phoenyx.me
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
-      POSTGRES_HOST: nc-pgsql-db
+      POSTGRES_HOST: nc-postgres
     volumes:
-       - pgadmin:/var/lib/pgadmin
+      - pgadmin:/var/lib/pgadmin
     ports:
       - "5050:80"
     networks:
@@ -53,31 +66,68 @@ services:
       - nginx_proxy_backend
     restart: unless-stopped
 
-  nc-pgsql-app:
-    container_name: nc-pgsql-app
+  nextcloud-app:
+    container_name: nc-app
     depends_on:
-      - nc-pgsql-db
+      - nc-postgres
+      - nc-redis
     build: 
       context: .
       dockerfile: docker_nc_pgsql_app
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+        reservations:
+          memory: 500M
     ports:
       - '8088:80'
     volumes:
-      - pgdata:/var/www/html/
+      - type: bind
+        source: /mnt/storage/nextcloud
+        target: /var/www/html
+      - type: bind
+        source: /mnt/storage/nc_data
+        target: /var/www/html/data
+      - type: bind
+        source: /mnt/storage/nextcloud/custom_apps
+        target: /var/www/html/custom_apps
+      - type: bind
+        source: /mnt/storage/nextcloud/config 
+        target: /var/www/html/config 
+      # - type: bind
+      #   source: /mnt/storage/nextcloud/custom_apps
+      #   target: /var/www/html/custom_apps
+      # - type: bind
+      #   source: /mnt/storage/nextcloud/custom_apps
+      #   target: /var/www/html/custom_apps
     healthcheck:
       test: curl --fail http://localhost || exit 1
       interval: 30s
       retries: 5
       timeout: 10s
     environment:
-      POSTGRES_PASSWORD: xwmhP02WZ6rnUz5uzT9LIh7pROIqfr
-      POSTGRES_DB: nextcloud
-      POSTGRES_USER: postgres
-      POSTGRES_HOST: nc-pgsql-db
-      POSTGRES_DB_PORT: 5433
-      NC_overwriteprotocol: https         #set overwriteprotocol to https to fix Remote Proxy Failure
-      NC_default_phone_region: DE     #Set default_phone_region to DE=Germany
+      REDIS_HOST: nextcloud-redis
+      # Redis Passwort von oben wieder eingeben
+      REDIS_HOST_PASSWORD: ${R_PW}
+      POSTGRES_PASSWORD: ${P_PW}
+      POSTGRES_DB: ${P_DB}
+      POSTGRES_USER: ${P_U}
+      POSTGRES_HOST: nc-postgres
+      POSTGRES_DB_PORT: 5433     
+      #Set overwriteprotocol to https to fix Remote Proxy Failure
+      NC_overwriteprotocol: https
+      #Set default_phone_region to DE=Germany
+      NC_default_phone_region: DE
+      #Set Default EMail Config
+      SMTP_HOST: ${S_H}
+      SMTP_SECURE: SSL
+      SMTP_PORT: 465
+      SMTP_NAME: ${S_U}
+      SMTP_PASSWORD: ${S_PW}
+      MAIL_FROM_ADDRESS: admin
+      MAIL_DOMAIN: phoenyx.me
     networks:
       - nginx_proxy_frontend
       - nginx_proxy_backend

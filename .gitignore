@@ -1,0 +1,6 @@
+.env
+config.sample.php
+redis.config.php
+reverse-proxy.config.php
+smtp.config.php
+docker-compose-nextcloud-pgsql-dev.yml
