@@ -96,9 +96,7 @@ services:
       - type: bind
         source: /mnt/storage/nextcloud/config 
         target: /var/www/html/config 
-      # - type: bind
-      #   source: /mnt/storage/nextcloud/custom_apps
-      #   target: /var/www/html/custom_apps
+      # Volume-Example for more Volumes
       # - type: bind
       #   source: /mnt/storage/nextcloud/custom_apps
       #   target: /var/www/html/custom_apps
@@ -126,8 +124,8 @@ services:
       SMTP_PORT: 465
       SMTP_NAME: ${S_U}
       SMTP_PASSWORD: ${S_PW}
-      MAIL_FROM_ADDRESS: admin
-      MAIL_DOMAIN: phoenyx.me
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_DOMAIN: ${MAIL_DOMAIN}
     networks:
       - nginx_proxy_frontend
       - nginx_proxy_backend
