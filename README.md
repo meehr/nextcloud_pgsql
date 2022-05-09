@@ -8,34 +8,34 @@
       - [Bootloader](#bootloader)
       - [Raspberry Pi Image](#raspberry-pi-image)
       - [Anpassungen am OS](#anpassungen-am-os)
-        - [Docker Repo einbinden und installieren](#docker-repo-einbinden-und-installieren)
-          - [Alte Version deinstallieren](#alte-version-deinstallieren)
-          - [Docker Installation](#docker-installation)
+      - [Docker Repo einbinden und installieren](#docker-repo-einbinden-und-installieren)
+        - [Alte Version deinstallieren](#alte-version-deinstallieren)
+        - [Docker Installation](#docker-installation)
         - [Docker-Compose installation](#docker-compose-installation)
         - [Docker-Compose Cmdline Completion](#docker-compose-cmdline-completion)
           - [Installation aus dem Paket](#installation-aus-dem-paket)
-          - [Post Installation Schritte](#post-installation-schritte)
-        - [Anpassungen am System](#anpassungen-am-system)
-          - [Fix für Redis in Docker Container](#fix-für-redis-in-docker-container)
-          - [Fix RAM-Limit für Docker Container](#fix-ram-limit-für-docker-container)
-        - [Zusätzliche Software](#zusätzliche-software)
+        - [Post Installation Schritte](#post-installation-schritte)
+    - [Anpassungen am System](#anpassungen-am-system)
+      - [Fix für Redis in Docker Container](#fix-für-redis-in-docker-container)
+      - [Fix RAM-Limit für Docker Container](#fix-ram-limit-für-docker-container)
+    - [Zusätzliche Software](#zusätzliche-software)
     - [LVM oder MDADM Raid einrichten](#lvm-oder-mdadm-raid-einrichten)
-    - [Einrichten und Deployen der Docker Container](#einrichten-und-deployen-der-docker-container)
-      - [Einrichten des NginX Proxy Manager](#einrichten-des-nginx-proxy-manager)
-      - [Einrichten des Portainer Webfrontend](#einrichten-des-portainer-webfrontend)
-      - [Einrichten der Nextcloud](#einrichten-der-nextcloud)
-        - [Was ist Nextcloud eigentlich?](#was-ist-nextcloud-eigentlich)
-        - [Mein Docker-Compose File für Nextcloud](#mein-docker-compose-file-für-nextcloud)
-          - [Volumes und Networks](#volumes-und-networks)
-          - [Service Nextcloud Datenbank (Postgre-SQL)](#service-nextcloud-datenbank-postgre-sql)
-          - [Service Redis](#service-redis)
-          - [Service Postgre-SQL Admin (Optional)](#service-postgre-sql-admin-optional)
-          - [Service Nextcloud App](#service-nextcloud-app)
-          - [Environment File](#environment-file)
-          - [Docker Buildfile](#docker-buildfile)
+  - [Einrichten und Deployen der Docker Container](#einrichten-und-deployen-der-docker-container)
+    - [Einrichten des NginX Proxy Manager](#einrichten-des-nginx-proxy-manager)
+    - [Einrichten des Portainer Webfrontend](#einrichten-des-portainer-webfrontend)
+    - [Einrichten der Nextcloud](#einrichten-der-nextcloud)
+      - [Was ist Nextcloud eigentlich?](#was-ist-nextcloud-eigentlich)
+      - [Mein Docker-Compose File für Nextcloud](#mein-docker-compose-file-für-nextcloud)
+        - [Volumes und Networks](#volumes-und-networks)
+        - [Service Nextcloud Datenbank (Postgre-SQL)](#service-nextcloud-datenbank-postgre-sql)
+        - [Service Redis](#service-redis)
+        - [Service Postgre-SQL Admin (Optional)](#service-postgre-sql-admin-optional)
+        - [Service Nextcloud App](#service-nextcloud-app)
+        - [Environment File](#environment-file)
+        - [Docker Buildfile](#docker-buildfile)
       - [Anpassungen an der NginX Proxy Manager Config](#anpassungen-an-der-nginx-proxy-manager-config)
-    - [Abschluß](#abschluß)
-    - [Danksagung](#danksagung)
+  - [Abschluß](#abschluß)
+  - [Danksagung](#danksagung)
 
 ## Beschreibung
 
@@ -82,9 +82,9 @@ Die Anleitung zu Installation und den Schritten danach für DietPi findet ihr in
 Nach dem Ihr euch per SSH verbunden habt kümmern wir uns nun um die Docker Installation und die Anpassungen für Redis und Docker.
 Ich nutze hierfür immer das Docker eigene Repo, da dieses grundsätzlich aktueller ist als das von Debian oder anderen Distributionen.
 
-##### Docker Repo einbinden und installieren
+#### Docker Repo einbinden und installieren
 
-###### Alte Version deinstallieren
+##### Alte Version deinstallieren
 
 Wenn eine alte Version von Docker installiert ist sollte diese vorher deinstalliert werden. (Kann bei einer neuen Installation drauf verzichtet werden.)
 
@@ -92,7 +92,7 @@ Wenn eine alte Version von Docker installiert ist sollte diese vorher deinstalli
 sudo apt-get remove docker docker-engine docker.io containerd runc
 ```
 
-###### Docker Installation
+##### Docker Installation
 
 Danach binden wir nun das Repositorie ein und installieren die neue Version.
 
@@ -156,7 +156,7 @@ Anleitung zur [Installation](https://docs.docker.com/compose/completion/)
    sudo dpkg -i /path/to/package.deb
    ```
 
-###### Post Installation Schritte
+##### Post Installation Schritte
 
 1. Docker Grupper erstellen
    `sudo groupadd docker`
@@ -169,9 +169,9 @@ Anleitung zur [Installation](https://docs.docker.com/compose/completion/)
 
 Eine genaue und ausführliche Beschreibung findet ihr in den [Docker Docs](https://docs.docker.com/), [Installation](https://docs.docker.com/engine/install/debian/), [Post-installation Steps](https://docs.docker.com/engine/install/linux-postinstall/).
 
-##### Anpassungen am System
+### Anpassungen am System
 
-###### Fix für Redis in Docker Container
+#### Fix für Redis in Docker Container
 
 Die Datei `/etc/sysctl.conf` am Ende erweitern
 
@@ -180,7 +180,7 @@ Die Datei `/etc/sysctl.conf` am Ende erweitern
 vm.overcommit_memory=1
 ```
 
-###### Fix RAM-Limit für Docker Container
+#### Fix RAM-Limit für Docker Container
 
 Standardmäßig ist Docker unter Linux nicht in der Lage RAM-Limits durchzusetzen, ob dies jedoch nicht schon unterstütz wird kann man einfach mit `docker info` prüfen, steht dort am Ende  `Warning: No Swap Limit support` ist dies noch nicht aktiviert.
 
@@ -192,7 +192,7 @@ cgroup_enable=memory cgroup_memory=1 swapaccount=1
 
 Weitere Hilfen dazu findet ihr in den Docker Docs unter [cgroup swap limit](https://docs.docker.com/engine/install/linux-postinstall/#your-kernel-does-not-support-cgroup-swap-limit-capabilities)
 
-##### Zusätzliche Software
+### Zusätzliche Software
 
 Ich habe noch ein paar zusätzliche Anwendungen auf meinen Pi installiert die mir persönlich dir Arbeit erleichtern. Ob und was ihr davon installiert überlasse ich euch für den Betrieb des der NextCloud sind sie nicht notwendig.
 
@@ -210,9 +210,9 @@ Wichtig ist am Ende nur das ihr den Speicher entsprechend einbindet in Eurer Fil
 
 Das Externe Einbinden von Speichern für die NextCloud werde ich sicher noch mal getrennt behandeln.
 
-### Einrichten und Deployen der Docker Container
+## Einrichten und Deployen der Docker Container
 
-#### Einrichten des NginX Proxy Manager
+### Einrichten des NginX Proxy Manager
 
 Da viele wie ich auch daheim keine Feste IP haben ist es notwendig einen entsprechenden Revers Proxy aufzusetzen um die Anfragen die per DynDNS über eine Domain an den Router bei Euch daheim geschickt werden entsprechend aufzulösen und weiter zu leiten.
 
@@ -224,7 +224,7 @@ Das File legt die beiden Netzwerke frontend und backend an und gibt euch im Ansc
 
 Einzelheiten werden in der Readme des Github Repositorie erklärt.
 
-#### Einrichten des Portainer Webfrontend
+### Einrichten des Portainer Webfrontend
 
 Um es auch für Einsteiger in die Welt der Container möglichst einfach zu gestalten habe ich mich entschieden noch vor der eigentlich Nextcloud ein Webfrontend zur Verwaltung und Konfiguration von einzelenen Container einzurichten.
 
@@ -235,19 +235,19 @@ Ich lasse den Container direkt auf dem Raspberry laufen, auf dem auch später di
 
 Das Repositorie findet ihr auf [Github.com/meehr](https://github.com/meehr/portainer).
 
-#### Einrichten der Nextcloud
+### Einrichten der Nextcloud
 
-##### Was ist Nextcloud eigentlich?
+#### Was ist Nextcloud eigentlich?
 
 Nextcloud ist eine freie Software für das Speichern von Daten (z. B. Dateien, Kalender, Kontakte etc.) auf einem Server. Auf die Daten kann der Anwender sowohl über eine Weboberfläche als auch mit Client-Applikationen (Smartphone und Desktop) zugreifen. Server und Clients können sich dabei synchronisieren. Nextcloud ermöglicht dem Anwender dadurch, auf einen zentralen und konsistenten Datenbestand von vielen Endgeräten aus zuzugreifen und diesen mit anderen Anwendern optional zu teilen. Neben der Datenhaltung bietet Nextcloud Funktionalitäten für Videokonferenzen und verschiedene Office-Applikationen über die Weboberfläche. (Quelle [Wikipedia](https://de.wikipedia.org/wiki/Nextcloud))
 
-##### Mein Docker-Compose File für Nextcloud
+#### Mein Docker-Compose File für Nextcloud
 
 Ich habe das Docker-Compose File welches ihr auf der Nextcloud Seite findet ein bisschen für meine Ansprüche angepasst und zudem um einen Postgre-Admin und um eine Redis ergänzt.
 
 Doch kommen wir zu den einzelnen Segmenten. Ich werde nur die Sachen erklären von denen ich weiß das sie Fragen aufwerfen können. Alle Variablen die ihr in dem Docker-Compose File findet legt ihr in dem Environment-File ( .env ) an und zwar nach dem Prinzip Name=Wert. Ein Beispiel werde ich ebenfall hier anhängen.
 
-###### Volumes und Networks
+##### Volumes und Networks
 
 Wie ihr dem Code entnehmen könnt habe ich keine Volumes für die eigentliche Nextcloud angelegt, da ich diese direkt im Service Segment für die Nextcloud anlege, warum seht ihr später.
 
@@ -267,7 +267,7 @@ networks:
     external: true
 ```
 
-###### Service Nextcloud Datenbank (Postgre-SQL)
+##### Service Nextcloud Datenbank (Postgre-SQL)
 
   Ich habe mich für eine Postgre-SQL entschieden bei Nextcloud, da mich die notwendigen Anpassungen für MySQL/MariaDB genervt haben und ich mir die DB darunter grundsätzlich egal ist.
 
@@ -298,7 +298,7 @@ nextcloud-db:
     - nginx_proxy_backend
 ```
 
-###### Service Redis
+##### Service Redis
 
 Um Nextcloud zu beschleunigen setze ich auf eine Redis DB als in Memory Cache. Die notwendigen Einstellungen sind in den aktuellen Nextcloud Versionen automatisch aktiviert. Zumindestens musste ich nichts mehr an der config.php vornehmen.
 
@@ -314,7 +314,7 @@ nextcloud-redis:
   command: redis-server --requirepass ${R_PW}
 ```
 
-###### Service Postgre-SQL Admin (Optional)
+##### Service Postgre-SQL Admin (Optional)
 
 Wie schon im Titel geschrieben ist dieser Abschnitt optional, wer gerne eine Grafische Oberfläche für die Verwaltung der Postgre-SQL Datenbank nutzen möchte kann das hiermit tun.
 
@@ -343,7 +343,7 @@ nextcloud-pgadmin:
 #############
 ```
 
-###### Service Nextcloud App
+##### Service Nextcloud App
 
 Die eigentlich App und damit der wichtigste Teil selbst. Hier habe ich die meisten Anpassungen vorgenommen. So habe ich die Default Phone Region direkt im docker-compose File festgelegt und auf das Overwriteprotocol auf https, zudem habe ich noch die Default Email Config mit Hilfe von Environment Variablen festgelegt. Mit ein bisschen Feinschliff lassen sich sicher auch noch die Pfade für CALDAV und CARDDAV anpassen.Doch für den Anfang sollten die vorgenommen Anpassungen die meisten Fehler schon beheben.
 Fangen wir an.
@@ -475,7 +475,7 @@ Fangen wir an.
       - nginx_proxy_backend
     ```
 
-###### Environment File
+##### Environment File
 
 Da ich viele Variablen benutze habe ich ein entprechendes .env File angelegt. Dieses ist nicht im Repo enthalten, da darin Benutzernamen und PW gespeichert werden. Aber hier ist ein Blanko File welches alle benutzen Variablen enthält und ihr müsst sie nur noch befüllen.
 
@@ -502,7 +502,7 @@ MAIL_FROM_ADDRESS=
 MAIL_DOMAIN=
 ```
 
-###### Docker Buildfile
+##### Docker Buildfile
 
 Ich habe neben wie unter Punkt 2 des letzten Abschnitts schon angedeutet auch am Image noch ein paar Anpassungen vorgenommen. Diese werden durch ein extra File beim Aufruf in das Image eingebaut. Ihr erzeugt also euer eigenes Image.
 
@@ -535,10 +535,10 @@ Nach der Anmeldung legt ihr den Proxy Host für die Domain unter der ihr Eure Ne
 
 ![Nginx Proxy Manager Bild 1](./img/nextcloud_nginx_1.png "Proxy Host anlegen") ![Nginx Proxy Manager Bild 2](./img/nextcloud_nginx_2.png "Proxy Host Location anpassen für WebCal und WebCard")![Nginx Proxy Manager Bild 3](./img/nextcloud_nginx_3.png "Proxy Host SSL Cert")
 
-### Abschluß
+## Abschluß
 
 Damit wären wir am Ende der Anleitung / Tutorials. Ich hoffe ich konnte auch Neueinsteigern damit helfen.
 
-### Danksagung
+## Danksagung
 
 Mein Dank geht vor allem an [Christian Lempa](https://github.com/xcad2k) der mich insperiert hat vor allem im Bereich Nginx Proxy Manager. Und die vielen anderen die in den FB Gruppen oder Raspberry Gruppen meine Ungeduld und Fragen ertragen und beantwortet haben.
