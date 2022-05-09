@@ -31,6 +31,7 @@
           - [Service Redis](#service-redis)
           - [Service Postgre-SQL Admin (Optional)](#service-postgre-sql-admin-optional)
           - [Service Nextcloud App](#service-nextcloud-app)
+          - [Environment File](#environment-file)
           - [Docker Buildfile](#docker-buildfile)
       - [Anpassungen an der NginX Proxy Manager Config](#anpassungen-an-der-nginx-proxy-manager-config)
     - [Abschluß](#abschluß)
@@ -473,6 +474,33 @@ Fangen wir an.
       - nginx_proxy_frontend
       - nginx_proxy_backend
     ```
+
+###### Environment File
+
+Da ich viele Variablen benutze habe ich ein entprechendes .env File angelegt. Dieses ist nicht im Repo enthalten, da darin Benutzernamen und PW gespeichert werden. Aber hier ist ein Blanko File welches alle benutzen Variablen enthält und ihr müsst sie nur noch befüllen.
+
+```text
+P_PW=
+P_DB=
+P_U=
+P_PORT=
+P_HOST=
+PGADMIN_PORT=
+S_PW=
+S_H=
+S_U=
+R_HOST=
+R_CONTAINER=
+R_PW=
+PGADMIN_DEFAULT_EMAIL=
+PGADMIN_CONTAINER=
+PGADMIN_DEFAULT_PASSWORD=
+NC_PORT=
+NC_SOURCE=
+NC_DATA_SOURCE=
+MAIL_FROM_ADDRESS=
+MAIL_DOMAIN=
+```
 
 ###### Docker Buildfile
 
